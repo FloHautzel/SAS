@@ -1,0 +1,47 @@
+
+/* Library to be read */
+%let libname=>>LIBRARY<<;
+
+/* List of all tables and columns in the library */
+PROC SQL;
+	create table work.tables_and_columns as
+	select libname, memname, name, label from dictionary.columns 
+	where libname="&libname.";
+QUIT;
+
+
+/* List of alle Tablenames in the library */
+proc sql noprint;
+    select distinct memname into :memname_list separated by ' '
+    from work.tables_and_columns;
+quit;
+
+
+%let data_path = "path_to_output_directory";
+
+/* Loop through each unique memname and export CSV files */
+%macro export_memname_data(memname);
+    data table_data(keep=name label);
+        set work.tables_and_columns;
+        where memname = "&memname";
+    run;
+
+    %let csv_file = &PATH./&libname._&memname..csv;
+
+    proc export data=table_data
+        outfile="&csv_file."
+        dbms=csv replace;
+    run;
+
+    %put CSV file for &memname. exported to &csv_file.;
+%mend;
+
+%macro start;
+/* Call the macro for each memname in the list */
+%let memname_count = %sysfunc(countw(&memname_list));
+%do i = 1 %to &memname_count;
+    %let current_memname = %scan(&memname_list, &i);
+    %export_memname_data(&current_memname);
+%end;
+%mend;
+%start;
