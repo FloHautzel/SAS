@@ -1,0 +1,5 @@
+PROC SQL;
+	create table work.tables_and_columns_of_VAM_VC as
+	select libname, memname, name, label from dictionary.columns 
+	where libname='VAM_VC';
+QUIT;
