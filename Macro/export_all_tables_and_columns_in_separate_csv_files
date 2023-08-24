@@ -1,11 +1,15 @@
 
 /* Library to be read */
-%let libname=>>LIBRARY<<;
+%let libname=XXXX;
+
+/* Creates a Subfolder "library" in  */
+%sysexec cd <<PATH>>;
+%sysexec mkdir &libname;
 
 /* List of all tables and columns in the library */
 PROC SQL;
 	create table work.tables_and_columns as
-	select libname, memname, name, label from dictionary.columns 
+	select * /*libname, memname, name, label*/ from dictionary.columns 
 	where libname="&libname.";
 QUIT;
 
@@ -21,12 +25,12 @@ quit;
 
 /* Loop through each unique memname and export CSV files */
 %macro export_memname_data(memname);
-    data table_data(keep=name label);
+    data table_data(keep=lbiname memname name label format);
         set work.tables_and_columns;
         where memname = "&memname";
     run;
 
-    %let csv_file = &PATH./&libname._&memname..csv;
+    %let csv_file = <<PATH>>/&libname./&memname..csv;
 
     proc export data=table_data
         outfile="&csv_file."
@@ -45,3 +49,5 @@ quit;
 %end;
 %mend;
 %start;
+
+
