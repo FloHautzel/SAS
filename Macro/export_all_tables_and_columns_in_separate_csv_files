@@ -1,9 +1,19 @@
+/************************************************************
+ :Author: Florian Hautzel                              
+ :Version: 1.0
+ :Changes: 28.09.2023 - initial create
+
+:param libname: library to be evaluated
+:param path: path where the file should be stored
+
+*/
 
 /* Library to be read */
-%let libname=XXXX;
+%let libname=VAU_OCSP;
+%let path=&FTP_DE./OIV/OIV8/TEST;
 
 /* Creates a Subfolder "library" in  */
-%sysexec cd <<PATH>>;
+%sysexec cd &path.;
 %sysexec mkdir &libname;
 
 /* List of all tables and columns in the library */
@@ -30,7 +40,7 @@ quit;
         where memname = "&memname";
     run;
 
-    %let csv_file = <<PATH>>/&libname./&memname..csv;
+    %let csv_file = &path./&libname./&memname..csv;
 
     proc export data=table_data
         outfile="&csv_file."
@@ -49,5 +59,3 @@ quit;
 %end;
 %mend;
 %start;
-
-
